@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+from aiohttp import web
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -125,13 +126,29 @@ async def receive_video(message: Message, state: FSMContext):
     logger.info("Поздравление сохранено: видео")
     await message.answer("✅ Сохранено! Мама получит поздравление 20 марта в 8:00")
 
-async def main():
-    # Запускаем планировщик
-    scheduler = setup_scheduler(bot)
-    scheduler.start()
-
+async def run_bot():
     logger.info("Бот запущен")
     await dp.start_polling(bot)
+
+async def run_web():
+    # HTTP сервер нужен чтобы Render не убивал процесс
+    app = web.Application()
+    app.router.add_get("/", lambda r: web.Response(text="OK"))
+    app.router.add_get("/health", lambda r: web.Response(text="OK"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.getenv("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"HTTP сервер запущен на порту {port}")
+    # Держим сервер живым вечно
+    await asyncio.Event().wait()
+
+async def main():
+    scheduler = setup_scheduler(bot)
+    scheduler.start()
+    # Запускаем бота и HTTP сервер параллельно
+    await asyncio.gather(run_web(), run_bot())
 
 if __name__ == "__main__":
     asyncio.run(main())

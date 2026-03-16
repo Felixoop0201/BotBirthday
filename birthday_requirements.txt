@@ -3,3 +3,5 @@ apscheduler==3.10.4
 python-dotenv==1.0.1
 aiohttp==3.9.5
 pytz==2024.1
+pydantic==2.6.4
+pydantic-core==2.16.3

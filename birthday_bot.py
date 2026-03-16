@@ -64,6 +64,11 @@ async def mama_start(message: Message):
     save_storage(storage)
     logger.info("Мама активировала бота")
 
+# --- /test — вручную вызвать меню выбора (только Felix) ---
+@dp.message(Command("test"), F.from_user.id == SENDER_ID)
+async def test_cmd(message: Message):
+    await message.answer("Выбери тип поздравления:", reply_markup=congrats_keyboard())
+
 # --- Callback: выбор типа поздравления (только Felix) ---
 @dp.callback_query(F.from_user.id == SENDER_ID, F.data == "type_text")
 async def choose_text(callback: CallbackQuery, state: FSMContext):

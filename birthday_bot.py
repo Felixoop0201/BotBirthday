@@ -3,7 +3,6 @@ import json
 import logging
 import os
 
-from aiohttp import web
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -126,30 +125,12 @@ async def receive_video(message: Message, state: FSMContext):
     logger.info("Поздравление сохранено: видео")
     await message.answer("✅ Сохранено! Мама получит поздравление 20 марта в 8:00")
 
-# --- Health check endpoints ---
-# Render бьёт по / — без этого считает сервис упавшим и перезапускает его
-async def index(request):
-    return web.Response(text="OK")
-
-async def health(request):
-    return web.Response(text="OK")
-
 async def main():
     # Запускаем планировщик
     scheduler = setup_scheduler(bot)
     scheduler.start()
 
-    # Запускаем aiohttp сервер для keep-alive
-    app = web.Application()
-    app.router.add_get("/", index)
-    app.router.add_get("/health", health)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    port = int(os.getenv("PORT", 8080))
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
-
-    logger.info(f"Бот запущен | health endpoint: порт {port}")
+    logger.info("Бот запущен")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

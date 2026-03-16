@@ -121,7 +121,11 @@ async def receive_video(message: Message, state: FSMContext):
     logger.info("Поздравление сохранено: видео")
     await message.answer("✅ Сохранено! Мама получит поздравление 20 марта в 8:00")
 
-# --- Health check endpoint (для keep-alive пинга) ---
+# --- Health check endpoints ---
+# Render бьёт по / — без этого считает сервис упавшим и перезапускает его
+async def index(request):
+    return web.Response(text="OK")
+
 async def health(request):
     return web.Response(text="OK")
 
@@ -132,6 +136,7 @@ async def main():
 
     # Запускаем aiohttp сервер для keep-alive
     app = web.Application()
+    app.router.add_get("/", index)
     app.router.add_get("/health", health)
     runner = web.AppRunner(app)
     await runner.setup()

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: birthday-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python birthday_bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: SENDER_ID
+        sync: false
+      - key: RECEIVER_ID
+        sync: false
+      - key: RENDER_URL
+        sync: false
